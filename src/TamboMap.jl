@@ -4,29 +4,53 @@ using JSON
 using Glob
 using CairoMakie
 using GeoMakie
+using GeoMakie.GeoJSON
+
+export make_map, remove_background
 
 include("./institutions.jl")
 
-# First, make a surface plot
-lons = -180:180
-lats = -90:90
-field = [exp(cosd(l)) + 3(y/90) for l in lons, y in lats]
-
-fig = Figure()
-ax = GeoAxis(fig[1,1])
-sf = surface!(ax, lons, lats, field; shading = NoShading)
-cb1 = Colorbar(fig[1,2], sf; label = "field", height = Relative(0.65))
-
-using GeoMakie.GeoJSON
 countries_file = GeoMakie.assetpath("vector", "countries.geo.json")
-countries = GeoJSON.read(read(countries_file, String))
+const countries = GeoJSON.read(read(countries_file, String))
 
-n = length(countries)
-hm = poly!(ax, countries; color= 1:n, colormap = :dense,
-    strokecolor = :black, strokewidth = 0.5,
+function make_map(
+    institutions::Vector{TamboMap.Institution};
+    ocean_color = :black,
+    country_color_yes = :yellow,
+    country_color_no = :grey,
 )
-translate!(hm, 0, 0, 100) # move above surface plot
+    lons = -180:180
+    lats = -90:90
 
-fig
+    inst_countries = getfield.(getfield.(institutions, :location), :country)
+
+    color = [
+        country.name in inst_countries ? country_color_yes : country_color_no
+        for country in countries
+    ]
+
+    set_theme!(backgroundcolor = :transparent)
+
+    map = Figure()
+    ax = GeoAxis(
+        map[1,1],
+        xticklabelsvisible = false,
+        yticklabelsvisible = false,
+        xgridvisible=false,
+        ygridvisible=false,
+    )
+    field = [1 for _ in lons, _ in lats]
+
+    surface!(ax, lons, lats, field; colormap=[ocean_color, ocean_color])
+
+    hm = poly!(ax, countries; color=color,
+        strokecolor = :black, strokewidth = 0.5,
+        shading=NoShading,
+
+    )
+    translate!(hm, 0, 0, 100) # move above surface plot
+
+    return map
+end
 
 end # module TamboMap
