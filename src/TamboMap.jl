@@ -18,7 +18,11 @@ function make_map(
     ocean_color = :black,
     country_color_yes = :yellow,
     country_color_no = :grey,
+    scatter_color = nothing
 )
+    if typeof(scatter_color)==Nothing
+        scatter_color = country_color_no
+    end
     lons = -180:180
     lats = -90:90
 
@@ -44,12 +48,22 @@ function make_map(
     surface!(ax, lons, lats, field; colormap=[ocean_color, ocean_color])
 
     hm = poly!(ax, countries; color=color,
-        strokecolor = :black, strokewidth = 0.5,
+        strokecolor = :black, strokewidth = 0.25,
         shading=NoShading,
-
     )
+    
+    sc = scatter!(
+        ax,
+        [i.location.latitude for i in institutions],
+        [i.location.longitude for i in institutions],
+        color=scatter_color,
+        markersize=4,
+        # markerstrokewidth=100,
+        # markerstrokecolor=:black
+    )
+    
     translate!(hm, 0, 0, 100) # move above surface plot
-
+    translate!(sc, 0, 0, 101) # move above surface plot
     return map
 end
 

@@ -1,6 +1,8 @@
 struct Location
     country::String
     city::String
+    longitude::Float64
+    latitude::Float64
 end
 
 struct Institution
@@ -23,7 +25,12 @@ end
 
 function institution_from_json(file::String)
     d = JSON.parsefile(file)
-    loc = Location(d["location"]["country"], d["location"]["city"])
+    loc = Location(
+        d["location"]["country"],
+        d["location"]["city"],
+        d["location"]["latitude"],
+        d["location"]["longitude"],
+    )
     return Institution(d["name"], loc)
 end
     
