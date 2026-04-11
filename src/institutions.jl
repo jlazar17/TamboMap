@@ -8,7 +8,11 @@ end
 struct Institution
     name::String
     location::Location
+    logo_path::Union{String, Nothing}
+    logo_url::Union{String, Nothing}
 end
+
+Institution(name::String, location::Location) = Institution(name, location, nothing, nothing)
 
 function save_institution(institution::Institution, file::String)
     open(file, "w") do f
@@ -31,10 +35,12 @@ function institution_from_json(file::String)
         d["location"]["latitude"],
         d["location"]["longitude"],
     )
-    return Institution(d["name"], loc)
+    logo_path = get(d, "logo_path", nothing)
+    logo_url = get(d, "logo_url", nothing)
+    return Institution(d["name"], loc, logo_path, logo_url)
 end
     
 function institutions_from_json(dir::String)
-    files = Glob.glob("$(dir)/*.json")
+    files = Glob.glob("*.json", dir)
     return [institution_from_json(file) for file in files]
 end
