@@ -1,0 +1,11 @@
+# Downloaded logo images (re-fetched from URLs in geocode_cache at runtime)
+logo_cache/
+
+# Jupyter artifacts
+**/.ipynb_checkpoints/
+
+# Generated test outputs
+tambo_authors_revtex_map.png
+tambo_map_test.png
+test_revtex.png
+test_revtex_logos.png
